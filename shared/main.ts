@@ -51,10 +51,42 @@ export const compress = (files: File[], skipSorting?: boolean): string => {
 // - css/less (later)/sass (later)/css modules -> dom insert & export class names
 // - assets (later) -> binary & export url
 
-export const compile = (files: File[]): File[] => {
-  // TODO:
+type Plugin = {
+  name: string;
+  resolveId?: (id: string) => string | Promise<string> | null | Promise<null>;
+  load?: (id: string) => string | Promise<string> | null | Promise<null>;
+  transform?: (file: File) => File | Promise<File> | File[] | Promise<File[]> | null | Promise<null>;
+}
 
-  return files;
+const plugins: Plugin[] = [
+  // TypeScript
+  // CSS
+];
+
+const arraify = <T>(value: T | T[]): T[] => Array.isArray(value) ? value : [value]
+
+export const compile = async (files: File[]): Promise<File[]> => {
+  const compiledFiles: File[] = []
+  await Promise.all(files.map(async (file) => {
+    const plugin = plugins.find(plugin => plugin.resolveId && plugin.resolveId(file.name))
+    if (plugin) {
+      const resolvedId = await plugin.resolveId!(file.name)
+      if (resolvedId) {
+        const loadedContent = plugin.load && await plugin.load(resolvedId)
+        if (loadedContent) {
+          const transformedResult = plugin.transform && await plugin.transform({ name: resolvedId, content: loadedContent })
+          if (transformedResult) {
+            arraify(transformedResult).forEach(compiledFile => {
+              compiledFiles.push(compiledFile)
+            })
+          }
+        }
+      }
+    } else {
+      compiledFiles.push(file)
+    }
+  }))
+  return compiledFiles;
 }
 
 // ESM
