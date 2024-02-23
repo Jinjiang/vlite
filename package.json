@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "vite ui",
-    "dev:ui": "vite ui",
+    "dev": "vite",
+    "dev:ui": "vite",
     "dev:registry": "node --loader ts-node/esm ./registry/main.ts",
     "build": "vite build",
     "preview": "vite preview"
