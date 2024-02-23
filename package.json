@@ -1,0 +1,22 @@
+{
+  "name": "online-editor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite ui",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^20.11.20",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "express": "^4.18.2",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.4",
+    "vue": "^3.4.19"
+  }
+}
