@@ -1,11 +1,9 @@
 import crypto from 'crypto';
+import { File, Plugin } from './types';
+import typescript from './plugins/typescript';
+import css from './plugins/css';
 
 export const shared = 'shared';
-
-type File = {
-  name: string;
-  content: string;
-};
 
 // SFC <-> BFS
 // - `\x00\x00<filename1>\x00<content1>\x00\x00<filename2>\x00<content2>\x00\x00...`
@@ -51,16 +49,9 @@ export const compress = (files: File[], skipSorting?: boolean): string => {
 // - css/less (later)/sass (later)/css modules -> dom insert & export class names
 // - assets (later) -> binary & export url
 
-type Plugin = {
-  name: string;
-  resolveId?: (id: string) => string | Promise<string> | null | Promise<null>;
-  load?: (id: string) => string | Promise<string> | null | Promise<null>;
-  transform?: (file: File) => File | Promise<File> | File[] | Promise<File[]> | null | Promise<null>;
-}
-
 const plugins: Plugin[] = [
-  // TypeScript
-  // CSS
+  typescript(),
+  css(),
 ];
 
 const arraify = <T>(value: T | T[]): T[] => Array.isArray(value) ? value : [value]
@@ -71,16 +62,15 @@ export const compile = async (files: File[]): Promise<File[]> => {
     const plugin = plugins.find(plugin => plugin.resolveId && plugin.resolveId(file.name))
     if (plugin) {
       const resolvedId = await plugin.resolveId!(file.name)
-      if (resolvedId) {
-        const loadedContent = plugin.load && await plugin.load(resolvedId)
-        if (loadedContent) {
-          const transformedResult = plugin.transform && await plugin.transform({ name: resolvedId, content: loadedContent })
-          if (transformedResult) {
-            arraify(transformedResult).forEach(compiledFile => {
-              compiledFiles.push(compiledFile)
-            })
-          }
-        }
+      if (!resolvedId) {
+        return
+      }
+      const loadedContent = plugin.load && await plugin.load(resolvedId) || file.content
+      const transformedResult = plugin.transform && await plugin.transform({ name: resolvedId, content: loadedContent }) || file
+      if (transformedResult) {
+        arraify(transformedResult).forEach(compiledFile => {
+          compiledFiles.push(compiledFile)
+        })
       }
     } else {
       compiledFiles.push(file)
