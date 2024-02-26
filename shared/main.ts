@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { File, Plugin } from './types';
 import typescript from './plugins/typescript';
 import css from './plugins/css';
+import esmSh from './plugins/esm-sh';
 
 export const shared = 'shared';
 
@@ -52,6 +53,7 @@ export const compress = (files: File[], skipSorting?: boolean): string => {
 const plugins: Plugin[] = [
   typescript(),
   css(),
+  esmSh(),
 ];
 
 const arraify = <T>(value: T | T[]): T[] => Array.isArray(value) ? value : [value]
