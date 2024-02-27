@@ -8,12 +8,12 @@ const app = express()
 
 app.use(async (req, res) => {
   const urlPath = req.url === '/' ? '/index.html' : req.url
-  const filePath = path.resolve('vite-static', 'examples', urlPath.slice(1))
+  const filePath = path.resolve('vite-static', 'examples', 'vue', urlPath.slice(1))
   const file: File = {
     name: urlPath,
     content: fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : ''
   }
-  const compiledFiles = await compile([file])
+  const compiledFiles = await compile([file], { debug: true })
   if (urlPath.endsWith('.html')) {
     res.setHeader('Content-Type', 'text/html')
   } else {

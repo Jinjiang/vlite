@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { Context, File, Plugin } from './types.ts';
 import typescript from './plugins/typescript.ts';
 import css from './plugins/css.ts';
+import vue from './plugins/vue.ts';
 import { createLogger } from './utils.ts';
 // import esmSh from './plugins/esm-sh.ts';
 
@@ -54,6 +55,7 @@ export const compress = (files: File[], skipSorting?: boolean): string => {
 const plugins: Plugin[] = [
   typescript(),
   css(),
+  vue(),
   // esmSh(),
 ];
 
