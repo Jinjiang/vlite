@@ -42,7 +42,7 @@ const transform = async (file: File) => {
     classNames = result.classNames
   }
   return {
-    name: `${file.name}.js`,
+    name: `${file.name}.mjs`,
     content: t(content, classNames)
   }
 }

@@ -34,3 +34,13 @@ SFC:
 - compile
 - install
 - archive
+
+## Misc
+
+- vite-static: express + compile + React demo
+- 2 kinds of plugin mechanism
+  - one file in one file out, no imports resolution
+    easy to process
+  - one file in multiple files out, imports resolution
+    easy to understand, additional imports resolution
+  - files -> ids, imports resolution (vite)

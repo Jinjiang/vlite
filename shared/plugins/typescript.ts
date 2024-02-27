@@ -9,7 +9,7 @@ const resolvedId = (id: string) => {
 
 const transform = (file: File) => {
   return {
-    name: file.name.replace(/\.tsx?$/, '.js'),
+    name: file.name.replace(/\.tsx?$/, '.mjs'),
     content: t(file.content, { transforms: ["typescript", "imports"] }).code
   }
 }
