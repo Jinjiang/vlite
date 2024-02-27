@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { Context, File, Plugin } from './types.ts';
 import typescript from './plugins/typescript.ts';
 import css from './plugins/css.ts';
+import { createLogger } from './utils.ts';
 // import esmSh from './plugins/esm-sh.ts';
 
 export const shared = 'shared';
@@ -57,22 +58,23 @@ const plugins: Plugin[] = [
 ];
 
 export const compileFile = async (file: File, context?: Context): Promise<File> => {
+  const logger = createLogger('compileFile', context)
   let currentFile = file
-  console.log('[compileFile]', currentFile.name)
+  logger.log(currentFile.name)
   for await (const plugin of plugins) {
     if (plugin.resolveId) {
       const resolvedId = await plugin.resolveId(currentFile.name, context)
-      console.log('[resolvedId]', resolvedId)
+      logger.log('[resolvedId]', resolvedId)
       if (resolvedId) {
         const loadedContent = plugin.load && await plugin.load(resolvedId, context) || currentFile.content
         currentFile = plugin.transform && await plugin.transform({ name: resolvedId, content: loadedContent }, context) || currentFile
-        console.log('[transform]', currentFile.name)
-        console.log(currentFile.content)
+        logger.log('[transform]', currentFile.name)
+        logger.log(currentFile.content)
       }
     }
   }
-  console.log('[compileFile]', currentFile.name, 'done')
-  console.log(currentFile.content)
+  logger.log(currentFile.name, 'done')
+  logger.log(currentFile.content)
   return currentFile
 }
 

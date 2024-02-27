@@ -11,7 +11,8 @@ export type BuildFile = File & {
 export type MaybePromise<T> = T | Promise<T> | undefined | Promise<undefined>;
 
 export type Context = {
-  mode: 'development' | 'production';
+  mode?: 'development' | 'production';
+  debug?: boolean;
 }; // preserved for later
 
 export type Plugin = {
