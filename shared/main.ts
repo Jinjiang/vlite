@@ -1,8 +1,8 @@
 import crypto from 'crypto';
-import { File, Plugin } from './types';
-import typescript from './plugins/typescript';
-import css from './plugins/css';
-import esmSh from './plugins/esm-sh';
+import { Context, File, Plugin } from './types.ts';
+import typescript from './plugins/typescript.ts';
+import css from './plugins/css.ts';
+// import esmSh from './plugins/esm-sh.ts';
 
 export const shared = 'shared';
 
@@ -53,30 +53,33 @@ export const compress = (files: File[], skipSorting?: boolean): string => {
 const plugins: Plugin[] = [
   typescript(),
   css(),
-  esmSh(),
+  // esmSh(),
 ];
 
-const arraify = <T>(value: T | T[]): T[] => Array.isArray(value) ? value : [value]
-
-export const compile = async (files: File[]): Promise<File[]> => {
-  const compiledFiles: File[] = []
-  await Promise.all(files.map(async (file) => {
-    const plugin = plugins.find(plugin => plugin.resolveId && plugin.resolveId(file.name))
-    if (plugin) {
-      const resolvedId = await plugin.resolveId!(file.name)
-      if (!resolvedId) {
-        return
+export const compileFile = async (file: File, context?: Context): Promise<File> => {
+  let currentFile = file
+  console.log('[compileFile]', currentFile.name)
+  for await (const plugin of plugins) {
+    if (plugin.resolveId) {
+      const resolvedId = await plugin.resolveId(currentFile.name, context)
+      console.log('[resolvedId]', resolvedId)
+      if (resolvedId) {
+        const loadedContent = plugin.load && await plugin.load(resolvedId, context) || currentFile.content
+        currentFile = plugin.transform && await plugin.transform({ name: resolvedId, content: loadedContent }, context) || currentFile
+        console.log('[transform]', currentFile.name)
+        console.log(currentFile.content)
       }
-      const loadedContent = plugin.load && await plugin.load(resolvedId) || file.content
-      const transformedResult = plugin.transform && await plugin.transform({ name: resolvedId, content: loadedContent }) || file
-      if (transformedResult) {
-        arraify(transformedResult).forEach(compiledFile => {
-          compiledFiles.push(compiledFile)
-        })
-      }
-    } else {
-      compiledFiles.push(file)
     }
+  }
+  console.log('[compileFile]', currentFile.name, 'done')
+  console.log(currentFile.content)
+  return currentFile
+}
+
+export const compile = async (files: File[], context?: Context): Promise<File[]> => {
+  const compiledFiles: File[] = []
+  await Promise.all(files.map(async (file): Promise<void> => {
+    compiledFiles.push(await compileFile(file, context))
   }))
   return compiledFiles;
 }

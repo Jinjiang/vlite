@@ -17,7 +17,7 @@ const genImportMapCode = (importMap: object) => {
 const im = document.createElement('script');
 im.type = 'importmap';
 im.textContent = ${JSON.stringify(importMap)};
-document.currentScript.after(im);
+document.head.appendChild(im);
 `.trim()
 }
 
@@ -41,7 +41,7 @@ const transform = (file: File) => {
   }
   return {
     name: file.name,
-    content: t(file.content)
+    content: file.name.match(/\.(js|mjs|ts|tsx|jsx|css)$/) ? t(file.content) : file.content
   }
 }
 
