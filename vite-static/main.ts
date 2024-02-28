@@ -13,7 +13,7 @@ app.use(async (req, res) => {
     name: urlPath,
     content: fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : ''
   }
-  const compiledFiles = await compile([file], { debug: true })
+  const compiledFiles = await compile([file], { debug: false })
   if (urlPath.endsWith('.html')) {
     res.setHeader('Content-Type', 'text/html')
   } else {

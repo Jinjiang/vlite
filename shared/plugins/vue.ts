@@ -5,8 +5,6 @@ import modules from 'postcss-modules';
 import { compileStyle } from 'vue/compiler-sfc';
 import { File, Plugin } from '../types';
 
-// TODO: CSS Modules, scoped CSS, preprocessors
-
 const parseCssModules = async (file: File) => {
   let classNames: object | undefined
   const result = await postcss(
@@ -22,15 +20,15 @@ const parseCssModules = async (file: File) => {
   }
 }
 
-const tCss = (content: string, classNames?: object) => {
+const tCss = (content: string, classNames?: object, module?: string) => {
+  const cssModulesInsertion = module ? `cssModules[${JSON.stringify(module)}] = ${JSON.stringify(classNames || {})};` : ''
   return `
 {
   const style = document.createElement('style');
   style.innerHTML = ${JSON.stringify(content)};
   document.head.appendChild(style);
+  ${cssModulesInsertion}
 }
-
-// export default ${JSON.stringify(classNames || {})};
 `.trim()
 }
 
@@ -50,20 +48,18 @@ const transform = async (file: File) => {
     }
   })
   const compiledCss = await Promise.all(compiled.css.map(async cssFile => {
-    if (cssFile.filename.endsWith('.module.css')) {
-      // TODO: get module index and pass into tCss() as the third argument
+    if (cssFile.module) {
       const { code, classNames } = await parseCssModules({
         name: cssFile.filename,
         content: cssFile.code
       })
-      return tCss(code, classNames)
+      return tCss(code, classNames, cssFile.module)
     }
-    // TODO: scoped CSS
-    if ((cssFile as any).scoped) {
+    if (cssFile.scoped) {
       const result = compileStyle({
         source: cssFile.code,
         filename: cssFile.filename,
-        id: 'data-v-id',
+        id: `data-v-${cssFile.scoped}`,
         scoped: true,
       })
       return tCss(result.code)
