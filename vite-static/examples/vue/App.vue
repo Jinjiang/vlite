@@ -4,11 +4,37 @@ const count = ref(0)
 </script>
 
 <template>
-  <button @click="count++">count is: {{ count }}</button>
+  <button
+    @click="count++"
+    :class="[
+      $style.button,
+      foo.button
+    ]"
+  >
+    count is: {{ count }}
+  </button>
 </template>
 
 <style>
 button {
   color: red;
+}
+</style>
+
+<style scoped>
+button {
+  color: blue;
+}
+</style>
+
+<style module>
+.button {
+  color: green;
+}
+</style>
+
+<style module="foo">
+.button {
+  color: yellow;
 }
 </style>

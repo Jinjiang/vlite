@@ -3,7 +3,7 @@ import modules from 'postcss-modules';
 import { File, Plugin } from '../types';
 
 const parseCssModules = async (file: File) => {
-  let classNames
+  let classNames: object | undefined
   const result = await postcss(
     [modules({ getJSON: (_, json) => {
       classNames = json
@@ -19,9 +19,11 @@ const parseCssModules = async (file: File) => {
 
 const t = (content: string, classNames?: object) => {
   return `
-const style = document.createElement('style');
-style.innerHTML = ${JSON.stringify(content)};
-document.head.appendChild(style);
+{
+  const style = document.createElement('style');
+  style.innerHTML = ${JSON.stringify(content)};
+  document.head.appendChild(style);
+}
 
 export default ${JSON.stringify(classNames || {})};
 `.trim()
