@@ -35,12 +35,12 @@ export const tCss = (content: string): string => {
   const style = document.createElement('style');
   style.innerHTML = ${JSON.stringify(content)};
   document.head.appendChild(style);
-}
+};
 `.trim()
 }
 
 const t = (content: string, classNames?: object) => {
-  const cssModulesInsertion = classNames ? `cssModules = ${JSON.stringify(classNames)};` : ''
+  const cssModulesInsertion = classNames ? `export default ${JSON.stringify(classNames)};` : ''
   return `
 ${tCss(content)}
 ${cssModulesInsertion}
@@ -48,7 +48,7 @@ ${cssModulesInsertion}
 }
 
 const resolvedId = (id: string) => {
-  if (id.endsWith('.css')) {
+  if (removeQuery(id).endsWith('.css')) {
     return id;
   }
 }

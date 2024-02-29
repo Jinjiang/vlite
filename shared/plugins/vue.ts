@@ -3,8 +3,13 @@ import { compile } from 'vue-simple-compiler';
 import { File, Plugin } from '../types.ts';
 import { tCss, tScopedCss, parseCssModules } from './css.ts';
 
+const genCssModuleAssignment = (module: string, value: string) => {
+  const moduleString = JSON.stringify(module)
+  return `cssModules[${moduleString}] = ${value};`
+}
+
 const tVueCss = (content: string, classNames?: object, module?: string) => {
-  const cssModulesInsertion = module ? `cssModules[${JSON.stringify(module)}] = ${JSON.stringify(classNames || {})};` : ''
+  const cssModulesInsertion = module ? genCssModuleAssignment(module, JSON.stringify(classNames || {})) : ''
   return `
 ${tCss(content)}
 ${cssModulesInsertion}
@@ -45,9 +50,24 @@ const transform = async (file: File) => {
     }
     return tVueCss(cssFile.code)
   }))
+  const externalImports: string[] = []
+  const externalCssModules: string[] = []
+  await Promise.all(compiled.externalJs.map(async jsFile => {
+    externalImports.push(`import ${JSON.stringify(jsFile.filename)};`)
+  }))
+  await Promise.all(compiled.externalCss.map(async cssFile => {
+    if (cssFile.module) {
+      externalImports.push(`import ${cssFile.module} from ${JSON.stringify(`${cssFile.filename}?module`)};`)
+      externalCssModules.push(genCssModuleAssignment(cssFile.module, cssFile.module))
+    } else {
+      const specifier = cssFile.scoped ? `${cssFile.filename}?scoped=${cssFile.scoped}` : cssFile.filename
+      externalImports.push(`import ${JSON.stringify(specifier)};`)
+    }
+  }))
+
   return {
     name: `${file.name}.mjs`,
-    content: `${compiled.js.code}\n${compiledCss.join('\n')}`
+    content: `${externalImports.join('\n')}\n${compiled.js.code}\n${compiledCss.join('\n')}\n${externalCssModules.join('\n')}`
   }
 }
 
