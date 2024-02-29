@@ -13,6 +13,8 @@ export type MaybePromise<T> = T | Promise<T> | undefined | Promise<undefined>;
 export type Context = {
   mode?: 'development' | 'production';
   debug?: boolean;
+  defaultResolver?: (id: string, context?: Context) => MaybePromise<string>;
+  defaultLoader?: (id: string, context?: Context) => MaybePromise<string>;
 }; // preserved for later
 
 export type Plugin = {

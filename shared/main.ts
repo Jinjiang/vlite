@@ -61,21 +61,33 @@ const plugins: Plugin[] = [
 
 export const compileFile = async (file: File, context?: Context): Promise<File> => {
   const logger = createLogger('compileFile', context)
-  let currentFile = file
-  logger.log(currentFile.name)
-  for await (const plugin of plugins) {
+  logger.log('[start]', file.name)
+  logger.log(file.content)
+  let currentFile: File = file
+  const defaultPlugin: Plugin = {
+    name: 'default',
+    resolveId: context?.defaultResolver,
+    load: context?.defaultLoader,
+  }
+  for await (const plugin of [defaultPlugin, ...plugins]) {
     if (plugin.resolveId) {
       const resolvedId = await plugin.resolveId(currentFile.name, context)
-      logger.log('[resolvedId]', resolvedId)
+      logger.log('[resolvedId]', currentFile.name)
+      logger.log(resolvedId)
       if (resolvedId) {
         const loadedContent = plugin.load && await plugin.load(resolvedId, context) || currentFile.content
-        currentFile = plugin.transform && await plugin.transform({ name: resolvedId, content: loadedContent }, context) || currentFile
+        logger.log('[load]', resolvedId)
+        logger.log(loadedContent)
+        currentFile = plugin.transform && await plugin.transform({ name: resolvedId, content: loadedContent }, context) || {
+          name: resolvedId,
+          content: loadedContent,
+        }
         logger.log('[transform]', currentFile.name)
         logger.log(currentFile.content)
       }
     }
   }
-  logger.log(currentFile.name, 'done')
+  logger.log('[done]', currentFile.name)
   logger.log(currentFile.content)
   return currentFile
 }
