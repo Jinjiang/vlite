@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import express, { Request, Response } from 'express'
+import mime from 'mime'
 import { compileFile } from '../shared/main.ts'
 import { getExtName, codeExtNamesRegExp, getQuery } from '../shared/utils.ts'
 
@@ -25,15 +26,14 @@ const handler = async (req: Request, res: Response): Promise<void> => {
     { defaultResolver, defaultLoader, debug: false }
   )
 
-  // TODO: handlg all common mime types
   if (req.url === '/' || req.url.endsWith('.html')) {
     res.setHeader('Content-Type', 'text/html')
   } else if (getExtName(req.url).match(codeExtNamesRegExp)) {
     res.setHeader('Content-Type', 'application/javascript')
   } else if (getQuery(req.url).url) {
     res.setHeader('Content-Type', 'application/javascript')
-  } else if (getExtName(req.url) === 'svg') {
-    res.setHeader('Content-Type', 'image/svg+xml')
+  } else {
+    res.setHeader('Content-Type', mime.getType(req.url) || 'text/plain')
   }
   res.send(compiledFile.content)
 }
