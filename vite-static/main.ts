@@ -17,7 +17,7 @@ const defaultLoader = (id: string): string => {
 const handler = async (req: Request, res: Response): Promise<void> => {
   const compiledFile = await compileFile(
     { name: req.url, content: '' },
-    { defaultResolver, defaultLoader, debug: true }
+    { defaultResolver, defaultLoader, debug: false }
   )
   if (req.url === '/' || req.url.endsWith('.html')) {
     res.setHeader('Content-Type', 'text/html')

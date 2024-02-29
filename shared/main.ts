@@ -4,7 +4,7 @@ import typescript from './plugins/typescript.ts';
 import css from './plugins/css.ts';
 import vue from './plugins/vue.ts';
 import { createLogger } from './utils.ts';
-// import esmSh from './plugins/esm-sh.ts';
+import esm from './plugins/esm.ts';
 
 export const shared = 'shared';
 
@@ -56,7 +56,7 @@ const plugins: Plugin[] = [
   typescript(),
   css(),
   vue(),
-  // esmSh(),
+  esm(),
 ];
 
 export const compileFile = async (file: File, context?: Context): Promise<File> => {
