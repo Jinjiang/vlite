@@ -1,6 +1,6 @@
 import postcss from 'postcss';
 import modules from 'postcss-modules';
-import { File, Plugin } from '../types';
+import { File, Plugin } from '../types.ts';
 
 const parseCssModules = async (file: File) => {
   let classNames: object | undefined
@@ -36,6 +36,9 @@ const resolvedId = (id: string) => {
 }
 
 const transform = async (file: File) => {
+  if (typeof file.content !== 'string') {
+    return
+  }
   let content = file.content
   let classNames
   if (file.name.endsWith('.module.css')) {

@@ -3,8 +3,9 @@ import { Context, File, Plugin } from './types.ts';
 import typescript from './plugins/typescript.ts';
 import css from './plugins/css.ts';
 import vue from './plugins/vue.ts';
-import { createLogger } from './utils.ts';
 import esm from './plugins/esm.ts';
+import assets from './plugins/assets.ts';
+import { createLogger } from './utils.ts';
 
 export const shared = 'shared';
 
@@ -57,6 +58,7 @@ const plugins: Plugin[] = [
   css(),
   vue(),
   esm(),
+  assets(),
 ];
 
 export const compileFile = async (file: File, context?: Context): Promise<File> => {
@@ -78,10 +80,12 @@ export const compileFile = async (file: File, context?: Context): Promise<File> 
         const loadedContent = plugin.load && await plugin.load(resolvedId, context) || currentFile.content
         logger.log('[load]', resolvedId)
         logger.log(loadedContent)
-        currentFile = plugin.transform && await plugin.transform({ name: resolvedId, content: loadedContent }, context) || {
+        const tempFile: File = {
           name: resolvedId,
           content: loadedContent,
+          binary: typeof loadedContent !== 'string'
         }
+        currentFile = plugin.transform && await plugin.transform(tempFile, context) || tempFile
         logger.log('[transform]', currentFile.name)
         logger.log(currentFile.content)
       }

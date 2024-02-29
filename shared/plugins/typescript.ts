@@ -1,5 +1,5 @@
 import { transform as t } from 'sucrase'
-import { File, Plugin } from '../types';
+import { File, Plugin } from '../types.ts';
 
 const resolvedId = (id: string) => {
   if (id.endsWith('.ts') || id.endsWith('.tsx')) {
@@ -8,6 +8,9 @@ const resolvedId = (id: string) => {
 }
 
 const transform = (file: File) => {
+  if (typeof file.content !== 'string') {
+    return
+  }
   return {
     name: file.name.replace(/\.tsx?$/, '.mjs'),
     content: t(file.content, { transforms: ["typescript", "jsx"] }).code

@@ -3,7 +3,7 @@ import { compile } from 'vue-simple-compiler';
 import postcss from 'postcss';
 import modules from 'postcss-modules';
 import { compileStyle } from 'vue/compiler-sfc';
-import { File, Plugin } from '../types';
+import { File, Plugin } from '../types.ts';
 
 const parseCssModules = async (file: File) => {
   let classNames: object | undefined
@@ -39,6 +39,9 @@ const resolvedId = (id: string) => {
 }
 
 const transform = async (file: File) => {
+  if (typeof file.content !== 'string') {
+    return
+  }
   const compiled = compile(file.content, {
     filename: file.name,
     tsTransform: (src) => {
