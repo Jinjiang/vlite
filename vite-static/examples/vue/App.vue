@@ -11,7 +11,8 @@ const count = ref(0)
       @click="count++"
       :class="[
         $style.button,
-        foo.button
+        foo.button,
+        bar.button
       ]"
     >
       count is: {{ count }}
@@ -42,3 +43,11 @@ button {
   color: yellow;
 }
 </style>
+
+<style src="./style.css"></style>
+
+<style scoped src="./style-scoped.css"></style>
+
+<style module src="./style-m.css"></style>
+
+<style module="bar" src="./style-m-bar.css"></style>

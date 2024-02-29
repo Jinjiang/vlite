@@ -1,34 +1,13 @@
 import { transform as t } from 'sucrase'
 import { compile } from 'vue-simple-compiler';
-import postcss from 'postcss';
-import modules from 'postcss-modules';
-import { compileStyle } from 'vue/compiler-sfc';
 import { File, Plugin } from '../types.ts';
+import { tCss, tScopedCss, parseCssModules } from './css.ts';
 
-const parseCssModules = async (file: File) => {
-  let classNames: object | undefined
-  const result = await postcss(
-    [modules({ getJSON: (_, json) => {
-      classNames = json
-    } })]
-  ).process(
-    file.content, { from: file.name }
-  )
-  return {
-    code: result.css,
-    classNames
-  }
-}
-
-const tCss = (content: string, classNames?: object, module?: string) => {
+const tVueCss = (content: string, classNames?: object, module?: string) => {
   const cssModulesInsertion = module ? `cssModules[${JSON.stringify(module)}] = ${JSON.stringify(classNames || {})};` : ''
   return `
-{
-  const style = document.createElement('style');
-  style.innerHTML = ${JSON.stringify(content)};
-  document.head.appendChild(style);
-  ${cssModulesInsertion}
-}
+${tCss(content)}
+${cssModulesInsertion}
 `.trim()
 }
 
@@ -56,18 +35,15 @@ const transform = async (file: File) => {
         name: cssFile.filename,
         content: cssFile.code
       })
-      return tCss(code, classNames, cssFile.module)
+      return tVueCss(code, classNames, cssFile.module)
     }
     if (cssFile.scoped) {
-      const result = compileStyle({
-        source: cssFile.code,
-        filename: cssFile.filename,
-        id: `data-v-${cssFile.scoped}`,
-        scoped: true,
-      })
-      return tCss(result.code)
+      return tVueCss(tScopedCss({
+        name: cssFile.filename,
+        content: cssFile.code
+      }, cssFile.scoped))
     }
-    return tCss(cssFile.code)
+    return tVueCss(cssFile.code)
   }))
   return {
     name: `${file.name}.mjs`,

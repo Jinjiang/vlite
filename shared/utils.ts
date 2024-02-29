@@ -12,6 +12,10 @@ export const createLogger = (name: string, context?: Context) => {
 
 export const codeExtNamesRegExp = /(js|mjs|ts|tsx|jsx|css|vue)/
 
+export const removeQuery = (name: string): string => {
+  return name.indexOf('?') > -1 ? name.slice(0, name.indexOf('?')) : name;
+}
+
 export const getExtName = (name: string): string => {
   const endIndex = name.indexOf('?') > -1 ? name.indexOf('?') : name.indexOf('#') > -1 ? name.indexOf('#') : name.length
   const extIndex = name.lastIndexOf('.');
