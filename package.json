@@ -1,5 +1,5 @@
 {
-  "name": "vlite",
+  "name": "@jinjiang/vlite",
   "version": "1.0.0",
   "description": "Lite demo server, inspired by Vite",
   "type": "module",

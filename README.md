@@ -16,11 +16,11 @@ Lite demo server, inspired by Vite
 ## Installation
 
 ```bash
-npm install -g vlite
+npm install -g @jinjiang/vlite
 # or
-yarn global add vlite
+yarn global add @jinjiang/vlite
 # or
-pnpm add -g vlite
+pnpm add -g @jinjiang/vlite
 ```
 
 ## Getting Started
