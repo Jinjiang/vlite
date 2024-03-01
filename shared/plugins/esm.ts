@@ -21,8 +21,8 @@ const transform = async (file: File, context?: Context) => {
   if (typeof file.content !== 'string') {
     return
   }
-  const logger = createLogger('compileFile', context)
-  logger.log('[esm]', file.name)
+  const logger = createLogger('esm', 'green', context)
+  logger.log('[transform]', file.name)
   const result: BuildFile = {
     name: file.name,
     content: file.content

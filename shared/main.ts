@@ -51,7 +51,7 @@ export const compress = (files: File[], skipSorting?: boolean): string => {
 // BFS -> ESM
 // - ts/jsx -> tsc
 // - css/less (later)/sass (later)/css modules -> dom insert & export class names
-// - assets (later) -> binary & export url
+// - assets -> binary & export url
 
 const plugins: Plugin[] = [
   typescript(),
@@ -62,7 +62,7 @@ const plugins: Plugin[] = [
 ];
 
 export const compileFile = async (file: File, context?: Context): Promise<File> => {
-  const logger = createLogger('compileFile', context)
+  const logger = createLogger('main', 'blue', context)
   logger.log('[start]', file.name)
   logger.log(file.content)
   let currentFile: File = file

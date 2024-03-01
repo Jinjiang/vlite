@@ -1,10 +1,23 @@
+import chalk from 'chalk';
 import { Context } from "./types.ts";
 
-export const createLogger = (name: string, context?: Context) => {
+type CHALK_COLOR_LIST = 
+ | 'black'
+ | 'red'
+ | 'green'
+ | 'yellow'
+ | 'blue'
+ | 'magenta'
+ | 'cyan'
+ | 'white'
+
+export const createLogger = (name: string, color: CHALK_COLOR_LIST = 'blue', context?: Context) => {
   return {
     log: (...argv: any[]) => {
-      if (context?.debug) {
-        console.log(`[${name}]`, ...argv);
+      const primary = chalk[color].underline;
+      const secondary = chalk.dim;
+      if (process.env.DEBUG || context?.debug) {
+        console.log(primary(`[${name}]`), ...argv.map((arg) => secondary(arg)));
       }
     },
   };
