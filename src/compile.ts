@@ -1,10 +1,10 @@
-import { Context, File, Plugin } from './types.ts';
-import typescript from './plugins/typescript.ts';
-import css from './plugins/css.ts';
-import vue from './plugins/vue.ts';
-import esm from './plugins/esm.ts';
-import assets from './plugins/assets.ts';
-import { createLogger } from './utils.ts';
+import { Context, File, Plugin } from './types.js';
+import typescript from './plugins/typescript.js';
+import css from './plugins/css.js';
+import vue from './plugins/vue.js';
+import esm from './plugins/esm.js';
+import assets from './plugins/assets.js';
+import { createLogger } from './utils.js';
 
 const plugins: Plugin[] = [
   typescript(),

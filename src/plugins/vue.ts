@@ -1,7 +1,7 @@
 import { transform as t } from 'sucrase'
 import { compile } from 'vue-simple-compiler';
-import { File, Plugin } from '../types.ts';
-import { tCss, tScopedCss, parseCssModules } from './css.ts';
+import { File, Plugin } from '../types.js';
+import { tCss, tScopedCss, parseCssModules } from './css.js';
 
 const genCssModuleAssignment = (module: string, value: string) => {
   const moduleString = JSON.stringify(module)

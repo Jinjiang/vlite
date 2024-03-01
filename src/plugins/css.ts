@@ -1,8 +1,8 @@
 import postcss from 'postcss';
 import modules from 'postcss-modules';
 import { compileStyle } from 'vue/compiler-sfc';
-import { File, Plugin } from '../types.ts';
-import { getQuery, removeQuery } from '../utils.ts';
+import { File, Plugin } from '../types.js';
+import { getQuery, removeQuery } from '../utils.js';
 
 export const tScopedCss = (file: File, id: string): string => {
   const result = compileStyle({

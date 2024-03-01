@@ -1,6 +1,6 @@
 import parseImports, { Import } from 'parse-imports'
-import { File, BuildFile, Plugin, Context } from '../types.ts';
-import { createLogger, codeExtNamesRegExp, getExtName, setQuery } from '../utils.ts';
+import { File, BuildFile, Plugin, Context } from '../types.js';
+import { createLogger, codeExtNamesRegExp, getExtName, setQuery } from '../utils.js';
 
 const replaceImport = (content: string, $import: Import, resolved: string): string => {
   const { startIndex, endIndex, moduleSpecifier: { code: specifier } } = $import

@@ -1,5 +1,5 @@
-import { File, Plugin } from '../types.ts';
-import { getQuery } from '../utils.ts';
+import { File, Plugin } from '../types.js';
+import { getQuery } from '../utils.js';
 
 export default (): Plugin => {
   return {

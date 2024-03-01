@@ -2,8 +2,8 @@ import fs from 'fs'
 import path from 'path'
 import express, { Request, Response } from 'express'
 import mime from 'mime'
-import { compileFile } from './compile.ts'
-import { getExtName, codeExtNamesRegExp, getQuery } from './utils.ts'
+import { compileFile } from './compile.js'
+import { getExtName, codeExtNamesRegExp, getQuery } from './utils.js'
 
 export const createServer = (targetDir: string, port: number) => {
   const resolvedTargetDir = targetDir || path.resolve('./')

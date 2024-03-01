@@ -1,5 +1,5 @@
 import { transform as t } from 'sucrase'
-import { File, Plugin } from '../types.ts';
+import { File, Plugin } from '../types.js';
 
 const resolvedId = (id: string) => {
   if (id.endsWith('.ts') || id.endsWith('.tsx')) {

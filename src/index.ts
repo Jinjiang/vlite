@@ -1,2 +1,2 @@
-export * from './compile.ts'
-export * from './server.ts'
+export * from './compile.js'
+export * from './server.js'

@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { Context } from "./types.ts";
+import { Context } from "./types.js";
 
 type CHALK_COLOR_LIST = 
  | 'black'
