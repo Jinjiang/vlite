@@ -8,10 +8,20 @@
     "vlite": "bin/vlite.js"
   },
   "main": "lib/index.js",
+  "files": [
+    "tsconfig.json",
+    "bin/*",
+    "lib/*",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "tsc --watch",
-    "demo": "DEBUG=1 vlite ./examples/vue",
-    "demo:react": "DEBUG=1 vlite ./examples/react",
+    "demo": "DEBUG=1 node ./bin/vlite.js ./examples/vue",
+    "demo:react": "DEBUG=1 node ./bin/vlite.js ./examples/react",
+    "run": "DEBUG=1 node ./bin/vlite.js",
+    "run:version": "DEBUG=1 node ./bin/vlite.js --version",
+    "run:help": "DEBUG=1 node ./bin/vlite.js --help",
     "build": "tsc"
   },
   "keywords": ["vite", "lite", "server", "static", "demo", "vue", "react", "typescript", "css"],
