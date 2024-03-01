@@ -2,15 +2,29 @@
   "name": "vlite",
   "version": "1.0.0",
   "description": "Lite demo server, inspired by Vite",
-  "main": "index.js",
   "type": "module",
+  "types": "lib/index.d.ts",
+  "bin": {
+    "vlite": "bin/vlite.js"
+  },
+  "main": "lib/index.js",
   "scripts": {
     "dev": "tsc --watch",
+    "demo": "DEBUG=1 vlite ./examples/vue",
+    "demo:react": "DEBUG=1 vlite ./examples/react",
     "build": "tsc"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["vite", "lite", "server", "static", "demo", "vue", "react", "typescript", "css"],
+  "author": "Jinjiang <zhaojinjiang@me.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jinjiang/vlite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Jinjiang/vlite/issues"
+  },
+  "homepage": "https://github.com/Jinjiang/vlite#readme",
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.20",
