@@ -30,7 +30,7 @@ A quick Vue demo
 ```bash
 echo "<div id=\"app\"></div><script type=\"module\" src=\"./main.ts\"></script>" > index.html
 echo "import { createApp } from 'vue'\nimport App from './App.vue'\ncreateApp(App).mount('#app')" > main.ts
-echo "<template><h1>Hello, Vlite!</h1></template>" > App.vue
+echo "<template><h1>Hello, Vlite\!</h1></template>" > App.vue
 vlite
 ```
 
@@ -38,7 +38,7 @@ A quick React demo
 
 ```bash
 echo "<div id=\"app\"></div><script type=\"module\" src=\"./main.tsx\"></script>" > index.html
-echo "import React from 'react'\nimport ReactDOM from 'react-dom'\nReactDOM.render(<h1>Hello, World!</h1>, document.getElementById('app'))" > main.tsx
+echo "import React from 'react'\nimport ReactDOM from 'react-dom'\nReactDOM.render(<h1>Hello, World\!</h1>, document.getElementById('app'))" > main.tsx
 vlite
 ```
 
