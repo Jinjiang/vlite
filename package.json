@@ -55,6 +55,6 @@
     "postcss-modules": "^6.0.0",
     "sucrase": "^3.35.0",
     "vue": "^3.4.19",
-    "vue-simple-compiler": "^0.0.6"
+    "vue-simple-compiler": "^0.0.7"
   }
 }
