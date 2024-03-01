@@ -9,6 +9,7 @@
     "dev:ui": "vite",
     "dev:registry": "node --loader ts-node/esm ./registry/main.ts",
     "dev:vite-static": "node --loader ts-node/esm ./vite-static/main.ts",
+    "dev:vite-static:react": "VITE_STATIC_TARGET=react node --loader ts-node/esm ./vite-static/main.ts",
     "build": "vite build",
     "preview": "vite preview"
   },

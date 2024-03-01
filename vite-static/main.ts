@@ -7,12 +7,14 @@ import { getExtName, codeExtNamesRegExp, getQuery } from '../shared/utils.ts'
 
 const app = express()
 
+const targetDir = path.resolve('vite-static', 'examples', process.env.VITE_STATIC_TARGET || 'vue')
+
 const defaultResolver = (id: string): string => {
   return id === '/' ? '/index.html' : id
 }
 
 const defaultLoader = (id: string): string | Buffer => {
-  const filePathWithQuery = path.resolve('vite-static', 'examples', 'vue', id.slice(1))
+  const filePathWithQuery = path.resolve(targetDir, id.slice(1))
   const filePath = filePathWithQuery.indexOf('?') > -1 ? filePathWithQuery.slice(0, filePathWithQuery.indexOf('?')) : filePathWithQuery
   if (getExtName(id).match(codeExtNamesRegExp)) {
     return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : ''
