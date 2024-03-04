@@ -5,7 +5,7 @@
   "type": "module",
   "types": "lib/index.d.ts",
   "bin": {
-    "vlite": "bin/vlite.js"
+    "vlite": "lib/bin.js"
   },
   "main": "lib/index.js",
   "files": [
@@ -17,14 +17,25 @@
   ],
   "scripts": {
     "dev": "tsc --watch",
-    "demo": "DEBUG=1 node ./bin/vlite.js ./examples/vue",
-    "demo:react": "DEBUG=1 node ./bin/vlite.js ./examples/react",
-    "run": "DEBUG=1 node ./bin/vlite.js",
-    "run:version": "DEBUG=1 node ./bin/vlite.js --version",
-    "run:help": "DEBUG=1 node ./bin/vlite.js --help",
+    "lint": "tsc --noEmit",
+    "demo": "DEBUG=1 node ./lib/bin.js ./examples/vue",
+    "demo:react": "DEBUG=1 node ./lib/bin.js ./examples/react",
+    "run": "DEBUG=1 node ./lib/bin.js",
+    "run:version": "DEBUG=1 node ./lib/bin.js --version",
+    "run:help": "DEBUG=1 node ./lib/bin.js --help",
     "build": "tsc"
   },
-  "keywords": ["vite", "lite", "server", "static", "demo", "vue", "react", "typescript", "css"],
+  "keywords": [
+    "vite",
+    "lite",
+    "server",
+    "static",
+    "demo",
+    "vue",
+    "react",
+    "typescript",
+    "css"
+  ],
   "author": "Jinjiang <zhaojinjiang@me.com>",
   "license": "MIT",
   "repository": {
@@ -37,6 +48,7 @@
   "homepage": "https://github.com/Jinjiang/vlite#readme",
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/minimist": "^1.2.5",
     "@types/node": "^20.11.20",
     "@types/react": "^18.2.59",
     "@types/react-dom": "^18.2.19",

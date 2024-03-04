@@ -50,6 +50,10 @@ vlite --help
 vlite --version
 ```
 
+## Examples
+
+See [React example](./examples/react/) and [Vue example](./examples/vue/).
+
 ## License
 
 MIT

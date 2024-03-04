@@ -40,6 +40,9 @@ devDependencies:
   '@types/express':
     specifier: ^4.17.21
     version: 4.17.21
+  '@types/minimist':
+    specifier: ^1.2.5
+    version: 1.2.5
   '@types/node':
     specifier: ^20.11.20
     version: 20.11.20
@@ -201,6 +204,10 @@ packages:
 
   /@types/mime@3.0.4:
     resolution: {integrity: sha512-iJt33IQnVRkqeqC7PzBHPTC6fDlRNRW8vjrgqtScAhrmMwe8c4Eo7+fUGTa+XdWrpEgpyKWMYmi2dIwMAYRzPw==}
+    dev: true
+
+  /@types/minimist@1.2.5:
+    resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
     dev: true
 
   /@types/node@20.11.20:

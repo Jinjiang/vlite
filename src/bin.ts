@@ -2,7 +2,7 @@
 
 import { createRequire } from "module";
 import minimist from 'minimist'
-import { createServer } from '../lib/index.js'
+import { createServer } from './server.js'
 
 const require = createRequire(import.meta.url);
 
