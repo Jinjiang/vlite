@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import express, { Request, Response } from 'express'
 import mime from 'mime'
-import { compileFile } from './compile.js'
+import { compileRequest } from './compile.js'
 import { getExtName, codeExtNamesRegExp, getQuery } from './utils.js'
 
 export const createServer = (targetDir: string, port: number) => {
@@ -25,9 +25,9 @@ export const createServer = (targetDir: string, port: number) => {
   const requestHandler = async (req: Request, res: Response): Promise<void> => {
 
     // Compile file
-    const compiledFile = await compileFile(
-      { name: req.url, content: '' },
-      { defaultResolver, defaultLoader, debug: false }
+    const compiledFile = await compileRequest(
+      { id: req.url, name: req.url, query: {} },
+      { defaultLoader, debug: false }
     )
 
     // Set Content-Type
@@ -41,7 +41,7 @@ export const createServer = (targetDir: string, port: number) => {
       res.setHeader('Content-Type', mime.getType(req.url) || 'text/plain')
     }
 
-    res.send(compiledFile.content)
+    res.send(compiledFile)
   }
 
   const app = express()
