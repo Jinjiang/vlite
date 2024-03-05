@@ -1,5 +1,5 @@
 import parseImports, { Import } from 'parse-imports'
-import { File, BuildFile, Plugin, Context } from '../types.js';
+import { File, Plugin, Context, Transformer } from '../types.js';
 import { createLogger, codeExtNamesRegExp, getExtName, setQuery } from '../utils.js';
 
 const replaceImport = (content: string, $import: Import, resolved: string): string => {
@@ -10,24 +10,28 @@ const replaceImport = (content: string, $import: Import, resolved: string): stri
   return `${before}${importStatement.replace(specifier, JSON.stringify(resolved))}${after}`
 }
 
-const resolveId = (id: string) => {
-  const extName = getExtName(id)
-  if (extName.match(codeExtNamesRegExp)) {
-    return id
-  }
-}
+const transform: Transformer = async (file, context?: Context) => {
+  const { name, content } = file
+  const extName = getExtName(name)
 
-const transform = async (file: File, context?: Context) => {
-  if (typeof file.content !== 'string') {
+  if (!extName.match(codeExtNamesRegExp)) {
     return
   }
-  const logger = createLogger('esm', 'green', context)
-  logger.log('[transform]', file.name)
-  const result: BuildFile = {
-    name: file.name,
-    content: file.content
+
+  if (typeof content !== 'string') {
+    return
   }
-  const imports = [...(await parseImports(file.content))]
+
+  const logger = createLogger('esm', 'green', context)
+  logger.log('[transform]', name)
+
+  const result: File = {
+    name,
+    content
+  }
+
+  // process package imports: reverse order to replace with esm.sh from bottom to top
+  const imports = [...(await parseImports(content))]
   imports.reverse().forEach($import => {
     const { moduleSpecifier } = $import
     if (moduleSpecifier.value) {
@@ -41,14 +45,14 @@ const transform = async (file: File, context?: Context) => {
       }
     }
   })
+
   logger.log(result.content)
-  return result
+  return result.content
 }
 
 export default (): Plugin => {
   return {
     name: 'esm',
-    resolveId: resolveId,
     transform: transform
   }
 }

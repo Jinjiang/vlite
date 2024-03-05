@@ -1,26 +1,35 @@
+export type Query = Record<string, string | boolean>;
+
+export type Request = {
+  id: string;
+  name: string;
+  query: Query;
+}
+
 export type File = {
   name: string;
   content: string | Buffer;
   binary?: boolean;
 };
 
-export type BuildFile = File & {
-  build?: File[]; // preserved for later
-}
+export type RequestedFile = File & {
+  query: Query;
+};
 
 export type MaybePromise<T> = T | undefined | Promise<T | undefined>;
+
+export type Loader = (req: Request, context?: Context) => MaybePromise<string | Buffer>;
+
+export type Transformer = (file: RequestedFile, context?: Context) => MaybePromise<string | Buffer>;
 
 export type Context = {
   mode?: 'development' | 'production';
   debug?: boolean;
-  defaultResolver?: (id: string, context?: Context) => MaybePromise<string>;
-  defaultLoader?: (id: string, context?: Context) => MaybePromise<string | Buffer>;
+  defaultLoader?: Loader;
 };
 
 export type Plugin = {
   name: string;
-  resolveId?: (id: string, context?: Context) => MaybePromise<string>;
-  load?: (id: string, context?: Context) => MaybePromise<string | Buffer>;
-  transform?: (file: File, context?: Context) => MaybePromise<BuildFile>;
+  load?: Loader;
+  transform?: Transformer;
 }
-

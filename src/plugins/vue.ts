@@ -1,6 +1,6 @@
 import { transform as t } from 'sucrase'
 import { compile } from 'vue-simple-compiler';
-import { File, Plugin } from '../types.js';
+import { Plugin, Transformer } from '../types.js';
 import { tCss, tScopedCss, parseCssModules } from './css.js';
 
 const genCssModuleAssignment = (module: string, value: string) => {
@@ -16,24 +16,28 @@ ${cssModulesInsertion}
 `.trim()
 }
 
-const resolvedId = (id: string) => {
-  if (id.endsWith('.vue')) {
-    return id;
-  }
-}
+const transform: Transformer = async (file) => {
+  const { name, content } = file
 
-const transform = async (file: File) => {
-  if (typeof file.content !== 'string') {
+  if (!name.endsWith('.vue')) {
     return
   }
-  const compiled = compile(file.content, {
-    filename: file.name,
+
+  if (typeof content !== 'string') {
+    return
+  }
+
+  // script + template
+  const compiled = compile(content, {
+    filename: name,
     tsTransform: (src) => {
       return {
         code: t(src, { transforms: ["typescript"] }).code
       }
     }
   })
+
+  // styles
   const compiledCss = await Promise.all(compiled.css.map(async cssFile => {
     if (cssFile.module) {
       const { code, classNames } = await parseCssModules({
@@ -50,6 +54,8 @@ const transform = async (file: File) => {
     }
     return tVueCss(cssFile.code)
   }))
+
+  // external imports
   const externalImports: string[] = []
   const externalCssModules: string[] = []
   await Promise.all(compiled.externalJs.map(async jsFile => {
@@ -65,16 +71,12 @@ const transform = async (file: File) => {
     }
   }))
 
-  return {
-    name: `${file.name}.mjs`,
-    content: `${externalImports.join('\n')}\n${compiled.js.code}\n${compiledCss.join('\n')}\n${externalCssModules.join('\n')}`
-  }
+  return `${externalImports.join('\n')}\n${compiled.js.code}\n${compiledCss.join('\n')}\n${externalCssModules.join('\n')}`
 }
 
 export default (): Plugin => {
   return {
     name: 'vue',
-    resolveId: resolvedId,
     transform: transform
   }
 }

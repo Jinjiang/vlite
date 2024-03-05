@@ -1,26 +1,23 @@
 import { transform as t } from 'sucrase'
-import { File, Plugin } from '../types.js';
+import { Plugin, Transformer } from '../types.js';
 
-const resolvedId = (id: string) => {
-  if (id.endsWith('.ts') || id.endsWith('.tsx')) {
-    return id;
-  }
-}
+const transform: Transformer = (file) => {
+  const { name, content } = file
 
-const transform = (file: File) => {
-  if (typeof file.content !== 'string') {
+  if (!name.endsWith('.ts') && !name.endsWith('.tsx')) {
     return
   }
-  return {
-    name: file.name.replace(/\.tsx?$/, '.mjs'),
-    content: t(file.content, { transforms: ["typescript", "jsx"] }).code
+
+  if (typeof content !== 'string') {
+    return
   }
+
+  return t(content, { transforms: ["typescript", "jsx"] }).code
 }
 
 export default (): Plugin => {
   return {
     name: 'typescript',
-    resolveId: resolvedId,
     transform: transform
   }
 }

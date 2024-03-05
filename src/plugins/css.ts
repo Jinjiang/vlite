@@ -1,8 +1,7 @@
 import postcss from 'postcss';
 import modules from 'postcss-modules';
 import { compileStyle } from 'vue/compiler-sfc';
-import { File, Plugin } from '../types.js';
-import { getQuery, removeQuery } from '../utils.js';
+import { File, Plugin, Transformer } from '../types.js';
 
 export const tScopedCss = (file: File, id: string): string => {
   const result = compileStyle({
@@ -47,36 +46,33 @@ ${cssModulesInsertion}
 `.trim()
 }
 
-const resolvedId = (id: string) => {
-  if (removeQuery(id).endsWith('.css')) {
-    return id;
-  }
-}
+const transform: Transformer = async (file) => {
+  const { name, query, content } = file
 
-const transform = async (file: File) => {
-  if (typeof file.content !== 'string') {
+  if (!name.endsWith('.css')) {
     return
   }
-  const query = getQuery(file.name)
+
+  if (typeof content !== 'string') {
+    return
+  }
+
+  // scoped css or css modules
   const scopedId = typeof query.scoped === 'string' ? query.scoped : query.id as string
-  const name = removeQuery(file.name)
-  let content = query.scoped ? tScopedCss(file, scopedId) : file.content
+  let code = query.scoped ? tScopedCss(file, scopedId) : content as string
   let classNames
   if (name.endsWith('.module.css') || query.module) {
     const result = await parseCssModules(file)
-    content = result.code
+    code = result.code
     classNames = result.classNames
   }
-  return {
-    name: `${name}.mjs`,
-    content: t(content, classNames)
-  }
+
+  return t(code, classNames)
 }
 
 export default (): Plugin => {
   return {
     name: 'css',
-    resolveId: resolvedId,
     transform: transform
   }
 }
