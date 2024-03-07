@@ -2,7 +2,7 @@
 
 <img src="./vlite.svg" width="160" height="160" />
 
-Lite demo server, inspired by Vite
+A lite demo server, inspired by Vite.
 
 ## Features
 
