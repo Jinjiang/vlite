@@ -175,11 +175,23 @@ const generateHtml = (html: string, scripts: Request[], targetDir: string) => {
   return generatedEntryHtml
 }
 
+const ignoredFiles = new Set([
+  'package.json',
+  'node_modules',
+  'package-lock.json',
+  'yarn.lock',
+  'pnpm-lock.yaml',
+  'dist',
+  'bundle'
+])
+
 const getAllFiles = (dirPath: string) => {
   const files = readdirSync(dirPath)
   files.forEach((file) => {
-    if (file === 'dist') return
-    if (file === 'bundle') return
+    if (file.startsWith('.')) return
+    if (ignoredFiles.has(file)) {
+      return
+    }
     if (statSync(join(dirPath, file)).isDirectory()) {
       getAllFiles(join(dirPath, file))
     } else {
