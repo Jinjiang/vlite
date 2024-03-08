@@ -48,6 +48,8 @@ vlite
 
 ```bash
 vlite [<target-dir>] [--port <port>]
+vlite [<target-dir>] --build
+vlite [<target-dir>] --bundle
 vlite --help
 vlite --version
 ```

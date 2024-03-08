@@ -71,7 +71,13 @@ const transform: Transformer = async (file) => {
     }
   }))
 
-  return `${externalImports.join('\n')}\n${compiled.js.code}\n${compiledCss.join('\n')}\n${externalCssModules.join('\n')}`
+  const generatedCode =  `${externalImports.join('\n')}\n${compiled.js.code}\n${compiledCss.join('\n')}\n${externalCssModules.join('\n')}`
+
+  return {
+    name,
+    query: {},
+    content: generatedCode
+  }
 }
 
 export default (): Plugin => {

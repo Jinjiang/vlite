@@ -56,7 +56,7 @@ export const createServer = (targetDir: string, port: number) => {
       res.setHeader('Content-Type', mime.getType(fileRequest.name) || 'text/plain')
     }
 
-    res.send(compiledFile)
+    res.send(compiledFile.content)
   }
 
   const app = express()

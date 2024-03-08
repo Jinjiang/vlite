@@ -12,7 +12,13 @@ const transform: Transformer = (file) => {
     return
   }
 
-  return t(content, { transforms: ["typescript", "jsx"] }).code
+  const generatedCode = t(content, { transforms: ["typescript", "jsx"] }).code
+
+  return {
+    name,
+    query: {},
+    content: generatedCode
+  }
 }
 
 export default (): Plugin => {

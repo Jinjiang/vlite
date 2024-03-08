@@ -1,4 +1,4 @@
-import { Context, Plugin, Request, RequestedFile } from './types.js';
+import { Context, Plugin, Query, Request, RequestedFile } from './types.js';
 import typescript from './plugins/typescript.js';
 import css from './plugins/css.js';
 import vue from './plugins/vue.js';
@@ -13,13 +13,14 @@ const plugins: Plugin[] = [
   assets(),
 ];
 
-export const compileRequest = async (req: Request, context?: Context): Promise<string | Buffer> => {
+export const compileRequest = async (req: Request, context?: Context): Promise<RequestedFile> => {
   const defaultPlugin: Plugin = {
     name: 'default',
     load: context?.defaultLoader,
   }
   const resolvedPlugins = [...plugins, defaultPlugin]
   let content: string | Buffer = ''
+  let query: Query = req.query
   for await (const plugin of resolvedPlugins) {
     if (plugin.load) {
       const loadedContent = await plugin.load(req, context)
@@ -33,17 +34,21 @@ export const compileRequest = async (req: Request, context?: Context): Promise<s
   for await (const plugin of resolvedPlugins) {
     const tempFile: RequestedFile = {
       name: req.name,
-      query: req.query,
+      query,
       content,
-      binary: typeof content !== 'string'
     }
     if (plugin.transform) {
-      const transformedContent = await plugin.transform(tempFile, context)
-      if (transformedContent) {
-        content = transformedContent
+      const transformedFile = await plugin.transform(tempFile, context)
+      if (transformedFile) {
+        content = transformedFile.content
+        query = transformedFile.query
       }
     }
   }
 
-  return content
+  return {
+    name: req.name,
+    content,
+    query,
+  }
 }

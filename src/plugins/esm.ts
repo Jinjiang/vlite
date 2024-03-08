@@ -1,8 +1,8 @@
 import parseImports, { Import } from 'parse-imports'
-import { File, Plugin, Context, Transformer } from '../types.js';
+import { Plugin, Context, Transformer, RequestedFile } from '../types.js';
 import { createLogger, codeExtNamesRegExp, getExtName, setQuery } from '../utils.js';
 
-const replaceImport = (content: string, $import: Import, resolved: string): string => {
+export const replaceImport = (content: string, $import: Import, resolved: string): string => {
   const { startIndex, endIndex, moduleSpecifier: { code: specifier } } = $import
   const before = content.slice(0, startIndex)
   const importStatement = content.slice(startIndex, endIndex)
@@ -11,7 +11,7 @@ const replaceImport = (content: string, $import: Import, resolved: string): stri
 }
 
 const transform: Transformer = async (file, context?: Context) => {
-  const { name, content } = file
+  const { name, query, content } = file
   const extName = getExtName(name)
 
   if (!extName.match(codeExtNamesRegExp)) {
@@ -25,8 +25,9 @@ const transform: Transformer = async (file, context?: Context) => {
   const logger = createLogger('esm', 'green', context)
   logger.log('[transform]', name)
 
-  const result: File = {
+  const result: RequestedFile = {
     name,
+    query,
     content
   }
 
@@ -36,10 +37,11 @@ const transform: Transformer = async (file, context?: Context) => {
     const { moduleSpecifier } = $import
     if (moduleSpecifier.value) {
       if (moduleSpecifier.type === 'package') {
-        const resolved = `https://esm.sh/${moduleSpecifier.value}`
-        result.content = replaceImport(result.content as string, $import, resolved)
-      }
-      if (!getExtName(moduleSpecifier.value).match(codeExtNamesRegExp)) {
+        if (context?.command !== 'bundle') {
+          const resolved = `https://esm.sh/${moduleSpecifier.value}`
+          result.content = replaceImport(result.content as string, $import, resolved)
+        }
+      } else if (!getExtName(moduleSpecifier.value).match(codeExtNamesRegExp)) {
         const resolved = setQuery(moduleSpecifier.value, { url: true })
         result.content = replaceImport(result.content as string, $import, resolved)
       }
@@ -47,7 +49,7 @@ const transform: Transformer = async (file, context?: Context) => {
   })
 
   logger.log(result.content)
-  return result.content
+  return result
 }
 
 export default (): Plugin => {

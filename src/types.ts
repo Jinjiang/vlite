@@ -9,7 +9,6 @@ export type Request = {
 export type File = {
   name: string;
   content: string | Buffer;
-  binary?: boolean;
 };
 
 export type RequestedFile = File & {
@@ -20,10 +19,11 @@ export type MaybePromise<T> = T | undefined | Promise<T | undefined>;
 
 export type Loader = (req: Request, context?: Context) => MaybePromise<string | Buffer>;
 
-export type Transformer = (file: RequestedFile, context?: Context) => MaybePromise<string | Buffer>;
+export type Transformer = (file: RequestedFile, context?: Context) => MaybePromise<RequestedFile>;
 
 export type Context = {
   mode?: 'development' | 'production';
+  command?: 'serve' | 'build' | 'bundle';
   debug?: boolean;
   defaultLoader?: Loader;
 };

@@ -1,2 +1,6 @@
 <div id="app"></div>
+<script>
+  // TODO: Remove this line when define plugin is supported by Rolldown
+  globalThis.process = { env: { NODE_ENV: 'development' } };
+</script>
 <script type="module" src="./main.ts"></script>
