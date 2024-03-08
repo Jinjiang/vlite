@@ -7,7 +7,12 @@ export default (): Plugin => {
       if (!file.query.url) {
         return
       }
-      return `export default ${JSON.stringify(file.name.split('?')[0])};`
+
+      return {
+        name: file.name,
+        query: { url: true },
+        content: `export default ${JSON.stringify(file.name.split('?')[0])};`
+      }
     }
   }
 }

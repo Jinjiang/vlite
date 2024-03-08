@@ -1,7 +1,7 @@
 import postcss from 'postcss';
 import modules from 'postcss-modules';
 import { compileStyle } from 'vue/compiler-sfc';
-import { File, Plugin, Transformer } from '../types.js';
+import { File, Plugin, Query, Transformer } from '../types.js';
 
 export const tScopedCss = (file: File, id: string): string => {
   const result = compileStyle({
@@ -67,7 +67,20 @@ const transform: Transformer = async (file) => {
     classNames = result.classNames
   }
 
-  return t(code, classNames)
+  const generatedQuery: Query = {}
+  if (query.scoped) {
+    generatedQuery.scoped = scopedId
+  }
+  if (query.module) {
+    generatedQuery.module = true
+  }
+  const generatedCode = t(code, classNames)
+
+  return {
+    name,
+    query: generatedQuery,
+    content: generatedCode
+  }
 }
 
 export default (): Plugin => {

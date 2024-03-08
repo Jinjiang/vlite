@@ -23,6 +23,7 @@ export type Transformer = (file: RequestedFile, context?: Context) => MaybePromi
 
 export type Context = {
   mode?: 'development' | 'production';
+  command?: 'serve' | 'build';
   debug?: boolean;
   defaultLoader?: Loader;
 };

@@ -1,5 +1,5 @@
 import parseImports, { Import } from 'parse-imports'
-import { File, Plugin, Context, Transformer } from '../types.js';
+import { Plugin, Context, Transformer, RequestedFile } from '../types.js';
 import { createLogger, codeExtNamesRegExp, getExtName, setQuery } from '../utils.js';
 
 export const replaceImport = (content: string, $import: Import, resolved: string): string => {
@@ -11,7 +11,12 @@ export const replaceImport = (content: string, $import: Import, resolved: string
 }
 
 const transform: Transformer = async (file, context?: Context) => {
-  const { name, content } = file
+  // keep original npm package imports in build mode
+  if (context?.command === 'build') {
+    return
+  }
+
+  const { name, query, content } = file
   const extName = getExtName(name)
 
   if (!extName.match(codeExtNamesRegExp)) {
@@ -25,8 +30,9 @@ const transform: Transformer = async (file, context?: Context) => {
   const logger = createLogger('esm', 'green', context)
   logger.log('[transform]', name)
 
-  const result: File = {
+  const result: RequestedFile = {
     name,
+    query,
     content
   }
 
@@ -47,7 +53,7 @@ const transform: Transformer = async (file, context?: Context) => {
   })
 
   logger.log(result.content)
-  return result.content
+  return result
 }
 
 export default (): Plugin => {

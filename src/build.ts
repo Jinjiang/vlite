@@ -75,6 +75,8 @@ export const traverse = async (entries: Request[]) => {
       binaryMap[entry.name] = result.content
     }
   }))
+
+  console.log({ idSrcToDist, idDistToSrc, codeMap, depsMap, binaryMap })
 }
 
 export const generate = async () => {
