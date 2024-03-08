@@ -11,11 +11,6 @@ export const replaceImport = (content: string, $import: Import, resolved: string
 }
 
 const transform: Transformer = async (file, context?: Context) => {
-  // keep original npm package imports in build mode
-  if (context?.command === 'build') {
-    return
-  }
-
   const { name, query, content } = file
   const extName = getExtName(name)
 
@@ -42,10 +37,11 @@ const transform: Transformer = async (file, context?: Context) => {
     const { moduleSpecifier } = $import
     if (moduleSpecifier.value) {
       if (moduleSpecifier.type === 'package') {
-        const resolved = `https://esm.sh/${moduleSpecifier.value}`
-        result.content = replaceImport(result.content as string, $import, resolved)
-      }
-      if (!getExtName(moduleSpecifier.value).match(codeExtNamesRegExp)) {
+        if (context?.command !== 'build') {
+          const resolved = `https://esm.sh/${moduleSpecifier.value}`
+          result.content = replaceImport(result.content as string, $import, resolved)
+        }
+      } else if (!getExtName(moduleSpecifier.value).match(codeExtNamesRegExp)) {
         const resolved = setQuery(moduleSpecifier.value, { url: true })
         result.content = replaceImport(result.content as string, $import, resolved)
       }

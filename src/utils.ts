@@ -43,8 +43,10 @@ export const getQuery = (name: string): Record<string, string | boolean> => {
   const queries = query.split('&');
   const result: Record<string, string | boolean> = {};
   queries.forEach((query) => {
-    const [key, value] = query.split('=', 2);
-    result[key] = value || true;
+    if (query) {
+      const [key, value] = query.split('=', 2);
+      result[key] = value || true;
+    }
   });
   return result;
 }

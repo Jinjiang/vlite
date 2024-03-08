@@ -1,10 +1,15 @@
+import { createRequire } from 'module'
+import { dirname, join, relative, resolve } from 'path'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import parseImports, { Import } from 'parse-imports'
+import { Parser as HtmlParser } from 'htmlparser2'
 import { compileRequest } from "./compile.js"
 import { Request } from "./types.js"
-import { genId, getQuery, removeQuery } from "./utils.js"
-import { dirname, join } from 'path'
+import { codeExtNamesRegExp, genId, getExtName, getQuery, removeQuery } from "./utils.js"
 import { replaceImport } from './plugins/esm.js'
-import { writeFileSync } from 'fs'
+
+const require = createRequire(import.meta.url)
+const fsExtra = require('fs-extra')
 
 const idSrcToDist = new Map<string, string>()
 const idDistToSrc = new Map<string, string>()
@@ -15,6 +20,7 @@ const binaryMap: Record<string, Buffer> = {}
 type ImportRecord = {
   specifier: string;
   id: string;
+  depIdSrc: string;
   import: Import;
 }
 
@@ -22,6 +28,26 @@ type Deps = {
   base: string;
   specifierSet: Set<string>;
   importRecords: ImportRecord[];
+}
+
+const readHtml = (targetDir: string) => {
+  const entryHtml = join(targetDir, 'index.html')
+  const entryHtmlContent = readFileSync(entryHtml, 'utf-8')
+  const entryScripts: Request[] = []
+  const htmlParser = new HtmlParser({
+    onopentag(name, attrs) {
+      if (name === 'script' && attrs.type === 'module' && attrs.src) {
+        const id = join('/', attrs.src)
+        entryScripts.push({ id, name: id, query: {} })
+      }
+    }
+  })
+  htmlParser.write(entryHtmlContent)
+  htmlParser.end()
+  return {
+    html: entryHtmlContent,
+    scripts: entryScripts
+  }
 }
 
 const getDeps = async (base: string, code: string): Promise<Deps> => {
@@ -33,12 +59,17 @@ const getDeps = async (base: string, code: string): Promise<Deps> => {
       if (moduleSpecifier.type !== 'relative') {
         return
       }
-      if (!moduleSpecifier.value.match(/^(https?:)?\/\//)) {
+      if (moduleSpecifier.value.match(/^(https?:)?\/\//)) {
         return
       }
+      const id = join(base, moduleSpecifier.value)
+      const depName = removeQuery(id)
+      const depQuery = getQuery(id)
+      const depIdSrc = genId(depName, depQuery)
       importRecords.push({
-        id: join(base, moduleSpecifier.value),
         specifier: moduleSpecifier.value,
+        id,
+        depIdSrc,
         import: $import
       })
     }
@@ -50,15 +81,28 @@ const getDeps = async (base: string, code: string): Promise<Deps> => {
   }
 }
 
-export const traverse = async (entries: Request[]) => {
+const traverse = async (entries: Request[], targetDir: string) => {
   const queue: Request[] = []
   await Promise.all(entries.map(async (entry) => {
     const idSrc = genId(entry.name, entry.query)
     if (idSrcToDist.has(idSrc)) return
-    const result = await compileRequest(entry)
+
+    const result = await compileRequest(entry, {
+      command: 'build',
+      defaultLoader: async (req) => {
+        const filename = resolve(targetDir, req.name.slice(1))
+        if (getExtName(entry.name).match(codeExtNamesRegExp)) {
+          return existsSync(filename) ? readFileSync(filename, 'utf-8') : ''
+        }
+        return existsSync(filename) ? readFileSync(filename) : Buffer.from('')
+      }    
+    })
+
     const idDist = genId(result.name, result.query)
+
     idSrcToDist.set(idSrc, idDist)
     idDistToSrc.set(idDist, idSrc)
+
     if (typeof result.content === 'string') {
       codeMap[idSrc] = result.content
       const deps = await getDeps(dirname(entry.name), result.content)
@@ -75,31 +119,64 @@ export const traverse = async (entries: Request[]) => {
       binaryMap[entry.name] = result.content
     }
   }))
-
-  console.log({ idSrcToDist, idDistToSrc, codeMap, depsMap, binaryMap })
+  if (queue.length > 0) {
+    await traverse(queue, targetDir)
+  }
 }
 
-export const generate = async () => {
+const generate = async (targetDir: string) => {
   const generatedNameList: string[] = []
   idSrcToDist.forEach((idDist, idSrc) => {
     const code = codeMap[idSrc]
     const deps = depsMap[idSrc]
-    const generatedName = join('dist', idDist + '.js')
+    const generatedName = join(targetDir, 'dist', idDist + '.js')
     let generatedCode = code
-    deps.importRecords.forEach(record => {
-      const depIdSrc = record.id
+    deps && deps.importRecords.forEach(record => {
+      const depIdSrc = record.depIdSrc
       const depIdDist = idSrcToDist.get(depIdSrc)
       if (!depIdDist) return
-      const newSpecifier = depIdDist + '.js'
-      generatedCode = replaceImport(generatedCode, record.import, newSpecifier)
+      const newSpecifier = relative(
+        dirname(generatedName),
+        join(targetDir, 'dist', '.' + depIdDist + '.js')
+      )
+      const newRelativeSpecifier = newSpecifier.startsWith('.') ? newSpecifier : './' + newSpecifier
+      generatedCode = replaceImport(generatedCode, record.import, newRelativeSpecifier)
     })
+    fsExtra.ensureDirSync(dirname(generatedName))
     writeFileSync(generatedName, generatedCode)
     generatedNameList.push(generatedName)
   })
   for (const [name, buffer] of Object.entries(binaryMap)) {
-    const generatedName = join('dist', name)
+    const generatedName = join(targetDir, 'dist', name)
+    fsExtra.ensureDirSync(dirname(generatedName))
     writeFileSync(generatedName, buffer)
     generatedNameList.push(generatedName)
   }
-  console.log('Generated:', generatedNameList.join(', '))
+
+  return generatedNameList
+}
+
+const generateHtml = (html: string, scripts: Request[], targetDir: string) => {
+  let generatedEntryHtmlContent = html
+  scripts.forEach(script => {
+    const idSrc = genId(script.name, script.query)
+    const idDist = idSrcToDist.get(idSrc)
+    if (!idDist) return
+    generatedEntryHtmlContent = generatedEntryHtmlContent.replace(
+      script.name,
+      idDist + '.js'
+    )
+  })
+  const generatedEntryHtml = join(targetDir, 'dist', 'index.html')
+  fsExtra.ensureDirSync(dirname(generatedEntryHtml))
+  writeFileSync(generatedEntryHtml, generatedEntryHtmlContent)
+  return generatedEntryHtml
+}
+
+export const build = async (targetDir: string) => {
+  const { html, scripts } = readHtml(targetDir)
+  await traverse(scripts, targetDir)
+  const generatedNameList = await generate(targetDir)
+  const generatedEntryHtml = generateHtml(html, scripts, targetDir)
+  console.log(`Generated:\n${[generatedEntryHtml, ...generatedNameList].map(x => `- ${x}`).join('\n')}`)
 }
