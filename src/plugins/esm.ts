@@ -37,7 +37,6 @@ const transform: Transformer = async (file, context?: Context) => {
     const { moduleSpecifier } = $import
     if (moduleSpecifier.value) {
       if (moduleSpecifier.type === 'package') {
-        console.log('[package]', moduleSpecifier.value, context?.command)
         if (context?.command !== 'bundle') {
           const resolved = `https://esm.sh/${moduleSpecifier.value}`
           result.content = replaceImport(result.content as string, $import, resolved)
