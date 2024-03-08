@@ -32,4 +32,6 @@ export const bundle = async (targetDir: string) => {
   const bundleHtmlFile = join(bundleDir, 'index.html')
   fsExtra.ensureDirSync(dirname(bundleHtmlFile))
   writeFileSync(bundleHtmlFile, html)
+
+  console.log(`Bundled:\n- ${bundleHtmlFile}\n- ${join(bundleDir, scripts[0].id)}`)
 }

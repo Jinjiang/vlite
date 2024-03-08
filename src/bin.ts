@@ -34,11 +34,11 @@ const main = async () => {
     return
   }
 
-  const targetDir = argv._[0]
+  const targetDir = argv._[0] || '.'
   const port = argv.p || argv.port || 3000
 
   if (argv.bundle) {
-    await build(targetDir)
+    await build(targetDir, true)
     await bundle(targetDir)
     return
   }

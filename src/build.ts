@@ -82,14 +82,14 @@ const getDeps = async (base: string, code: string): Promise<Deps> => {
   }
 }
 
-const traverse = async (entries: Request[], targetDir: string) => {
+const traverse = async (entries: Request[], targetDir: string, forBundle?: boolean) => {
   const queue: Request[] = []
   await Promise.all(entries.map(async (entry) => {
     const idSrc = genId(entry.name, entry.query)
     if (idSrcToDist.has(idSrc)) return
 
     const result = await compileRequest(entry, {
-      command: 'build',
+      command: forBundle ? 'bundle' : 'build',
       defaultLoader: async (req) => {
         const filename = resolve(targetDir, req.name.slice(1))
         const existed = existsSync(filename)
@@ -215,10 +215,10 @@ export const copyOtherFiles = (targetDir: string, copyTo: string) => {
   }).filter(Boolean)
 }
 
-export const build = async (targetDir: string) => {
+export const build = async (targetDir: string, forBundle?: boolean) => {
   getAllFiles(targetDir)
   const { html, scripts } = readHtml(targetDir)
-  await traverse(scripts, targetDir)
+  await traverse(scripts, targetDir, forBundle)
   const generatedNameList = await generate(targetDir)
   const generatedEntryHtml = generateHtml(html, scripts, targetDir)
   const otherFiles = copyOtherFiles(targetDir, 'dist')
