@@ -13,7 +13,7 @@ A lite demo server, inspired by Vite.
 - Support TypeScript, JSX, and TSX
 - Support CSS Modules and Scoped CSS
 - No node_modules installation required (package imports will be redirected to esm.sh)
-- No HMR, no SSR, no plugins, no bundling, no production
+- No HMR, no SSR, no plugins, ~~no bundling~~, no production
 
 ## Installation
 
@@ -54,9 +54,21 @@ vlite --help
 vlite --version
 ```
 
+> [!WARNING]
+> To be noticed: the build and bundle commands are in experimental stage. For bundle mode, you have to add this script into your `index.html`:
+> 
+> ```html
+> <script>
+>   // TODO: Remove this line when define plugin is supported by Rolldown
+>   globalThis.process = { env: { NODE_ENV: 'development' } };
+> </script>
+> ```
+>
+> See the [Vue example](./examples/vue/index.html).
+
 ## Examples
 
-See [React example](./examples/react/) and [Vue example](./examples/vue/).
+See the [React example](./examples/react/) and the [Vue example](./examples/vue/).
 
 ## License
 
