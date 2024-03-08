@@ -2,7 +2,7 @@ import parseImports, { Import } from 'parse-imports'
 import { File, Plugin, Context, Transformer } from '../types.js';
 import { createLogger, codeExtNamesRegExp, getExtName, setQuery } from '../utils.js';
 
-const replaceImport = (content: string, $import: Import, resolved: string): string => {
+export const replaceImport = (content: string, $import: Import, resolved: string): string => {
   const { startIndex, endIndex, moduleSpecifier: { code: specifier } } = $import
   const before = content.slice(0, startIndex)
   const importStatement = content.slice(startIndex, endIndex)
