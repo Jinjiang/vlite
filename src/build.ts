@@ -1,6 +1,6 @@
 import { createRequire } from 'module'
 import { dirname, join, relative, resolve } from 'path'
-import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'fs'
 import parseImports, { Import } from 'parse-imports'
 import { Parser as HtmlParser } from 'htmlparser2'
 import { compileRequest } from "./compile.js"
@@ -11,6 +11,7 @@ import { replaceImport } from './plugins/esm.js'
 const require = createRequire(import.meta.url)
 const fsExtra = require('fs-extra')
 
+const allFileList: Set<string> = new Set()
 const idSrcToDist = new Map<string, string>()
 const idDistToSrc = new Map<string, string>()
 const codeMap: Record<string, string> = {}
@@ -91,10 +92,11 @@ const traverse = async (entries: Request[], targetDir: string) => {
       command: 'build',
       defaultLoader: async (req) => {
         const filename = resolve(targetDir, req.name.slice(1))
+        const existed = existsSync(filename)
         if (getExtName(entry.name).match(codeExtNamesRegExp)) {
-          return existsSync(filename) ? readFileSync(filename, 'utf-8') : ''
+          return existed ? readFileSync(filename, 'utf-8') : ''
         }
-        return existsSync(filename) ? readFileSync(filename) : Buffer.from('')
+        return existed ? readFileSync(filename) : Buffer.from('')
       }    
     })
 
@@ -173,10 +175,39 @@ const generateHtml = (html: string, scripts: Request[], targetDir: string) => {
   return generatedEntryHtml
 }
 
+const getAllFiles = (dirPath: string) => {
+  const files = readdirSync(dirPath)
+  files.forEach((file) => {
+    if (file === 'dist') return
+    if (statSync(join(dirPath, file)).isDirectory()) {
+      getAllFiles(join(dirPath, file))
+    } else {
+      allFileList.add(join(dirPath, file))
+    }
+  })
+}
+
+const copyOtherFiles = (targetDir: string) => {
+  return Array.from(allFileList).map(file => {
+    if (file === join(targetDir, 'index.html')) {
+      return
+    }
+    if (getExtName(file).match(codeExtNamesRegExp)) {
+      return ''
+    }
+    const distFile = join(targetDir, 'dist', relative(targetDir, file))
+    fsExtra.ensureDirSync(dirname(distFile))
+    fsExtra.copyFileSync(file, distFile)
+    return distFile
+  }).filter(Boolean)
+}
+
 export const build = async (targetDir: string) => {
+  getAllFiles(targetDir)
   const { html, scripts } = readHtml(targetDir)
   await traverse(scripts, targetDir)
   const generatedNameList = await generate(targetDir)
   const generatedEntryHtml = generateHtml(html, scripts, targetDir)
-  console.log(`Generated:\n${[generatedEntryHtml, ...generatedNameList].map(x => `- ${x}`).join('\n')}`)
+  const otherFiles = copyOtherFiles(targetDir)
+  console.log(`Generated:\n${[generatedEntryHtml, ...generatedNameList, ...otherFiles].map(x => `- ${x}`).join('\n')}`)
 }
