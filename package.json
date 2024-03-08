@@ -22,6 +22,8 @@
     "demo:react": "DEBUG=1 node ./lib/bin.js ./examples/react",
     "demo:build": "DEBUG=1 node ./lib/bin.js ./examples/vue --build",
     "demo:build:react": "DEBUG=1 node ./lib/bin.js ./examples/react --build",
+    "demo:bundle": "DEBUG=1 node ./lib/bin.js ./examples/vue --bundle",
+    "demo:bundle:react": "DEBUG=1 node ./lib/bin.js ./examples/react --bundle",
     "run": "DEBUG=1 node ./lib/bin.js",
     "run:version": "DEBUG=1 node ./lib/bin.js --version",
     "run:help": "DEBUG=1 node ./lib/bin.js --help",

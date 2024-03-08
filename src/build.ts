@@ -31,7 +31,7 @@ type Deps = {
   importRecords: ImportRecord[];
 }
 
-const readHtml = (targetDir: string) => {
+export const readHtml = (targetDir: string) => {
   const entryHtml = join(targetDir, 'index.html')
   const entryHtmlContent = readFileSync(entryHtml, 'utf-8')
   const entryScripts: Request[] = []
@@ -179,6 +179,7 @@ const getAllFiles = (dirPath: string) => {
   const files = readdirSync(dirPath)
   files.forEach((file) => {
     if (file === 'dist') return
+    if (file === 'bundle') return
     if (statSync(join(dirPath, file)).isDirectory()) {
       getAllFiles(join(dirPath, file))
     } else {
@@ -187,7 +188,7 @@ const getAllFiles = (dirPath: string) => {
   })
 }
 
-const copyOtherFiles = (targetDir: string) => {
+export const copyOtherFiles = (targetDir: string, copyTo: string) => {
   return Array.from(allFileList).map(file => {
     if (file === join(targetDir, 'index.html')) {
       return
@@ -195,7 +196,7 @@ const copyOtherFiles = (targetDir: string) => {
     if (getExtName(file).match(codeExtNamesRegExp)) {
       return ''
     }
-    const distFile = join(targetDir, 'dist', relative(targetDir, file))
+    const distFile = join(targetDir, copyTo, relative(targetDir, file))
     fsExtra.ensureDirSync(dirname(distFile))
     fsExtra.copyFileSync(file, distFile)
     return distFile
@@ -208,6 +209,6 @@ export const build = async (targetDir: string) => {
   await traverse(scripts, targetDir)
   const generatedNameList = await generate(targetDir)
   const generatedEntryHtml = generateHtml(html, scripts, targetDir)
-  const otherFiles = copyOtherFiles(targetDir)
+  const otherFiles = copyOtherFiles(targetDir, 'dist')
   console.log(`Generated:\n${[generatedEntryHtml, ...generatedNameList, ...otherFiles].map(x => `- ${x}`).join('\n')}`)
 }
