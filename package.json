@@ -1,6 +1,6 @@
 {
   "name": "@jinjiang/vlite",
-  "version": "1.1.0-alpha3",
+  "version": "1.1.0",
   "description": "Lite demo server, inspired by Vite",
   "type": "module",
   "types": "lib/index.d.ts",
