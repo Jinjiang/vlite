@@ -16,6 +16,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "prepare": "pnpm run build",
     "dev": "tsc --watch",
     "lint": "tsc --noEmit",
     "demo": "DEBUG=1 node ./lib/bin.js ./examples/vue",
@@ -27,7 +28,8 @@
     "run": "DEBUG=1 node ./lib/bin.js",
     "run:version": "DEBUG=1 node ./lib/bin.js --version",
     "run:help": "DEBUG=1 node ./lib/bin.js --help",
-    "build": "tsc"
+    "build": "tsc",
+    "prepublish": "pnpm run build"
   },
   "keywords": [
     "vite",
