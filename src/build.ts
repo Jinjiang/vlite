@@ -165,8 +165,8 @@ const generateHtml = (html: string, scripts: Request[], targetDir: string) => {
     const idDist = idSrcToDist.get(idSrc)
     if (!idDist) return
     generatedEntryHtmlContent = generatedEntryHtmlContent.replace(
-      script.name,
-      idDist + '.js'
+      script.name.slice(1),
+      idDist.slice(1) + '.js'
     )
   })
   const generatedEntryHtml = join(targetDir, 'dist', 'index.html')
