@@ -11,6 +11,7 @@ import { replaceImport } from './plugins/esm.js'
 const require = createRequire(import.meta.url)
 const fsExtra = require('fs-extra')
 
+// TODO: put all the global variables into a context object
 const allFileList: Set<string> = new Set()
 const idSrcToDist = new Map<string, string>()
 const idDistToSrc = new Map<string, string>()
@@ -31,15 +32,19 @@ type Deps = {
   importRecords: ImportRecord[];
 }
 
+type EntryScript = Request & {
+  src: string;
+}
+
 export const readHtml = (targetDir: string) => {
   const entryHtml = join(targetDir, 'index.html')
   const entryHtmlContent = readFileSync(entryHtml, 'utf-8')
-  const entryScripts: Request[] = []
+  const entryScripts: EntryScript[] = []
   const htmlParser = new HtmlParser({
     onopentag(name, attrs) {
       if (name === 'script' && attrs.type === 'module' && attrs.src) {
         const id = join('/', attrs.src)
-        entryScripts.push({ id, name: id, query: {} })
+        entryScripts.push({ id, name: id, query: {}, src: attrs.src })
       }
     }
   })
@@ -158,15 +163,16 @@ const generate = async (targetDir: string) => {
   return generatedNameList
 }
 
-const generateHtml = (html: string, scripts: Request[], targetDir: string) => {
+const generateHtml = (html: string, scripts: EntryScript[], targetDir: string) => {
+  // TODO: use HTML parser to replace script src
   let generatedEntryHtmlContent = html
   scripts.forEach(script => {
     const idSrc = genId(script.name, script.query)
     const idDist = idSrcToDist.get(idSrc)
     if (!idDist) return
     generatedEntryHtmlContent = generatedEntryHtmlContent.replace(
-      script.name.slice(1),
-      idDist.slice(1) + '.js'
+      script.src,
+      idDist + '.js'
     )
   })
   const generatedEntryHtml = join(targetDir, 'dist', 'index.html')
